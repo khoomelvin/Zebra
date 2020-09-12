@@ -33,6 +33,7 @@
         self.title = NSLocalizedString(@"Home", @"");
         
         [self downloadFeaturedPackages:NO];
+        [self downloadCommunityNewsPosts];
     }
     
     return self;
@@ -154,5 +155,51 @@
 
 
 #pragma mark - Community News
+
+- (void)downloadCommunityNewsPosts {
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"https://reddit.com/r/jailbreak.json"]];
+    [request setHTTPMethod:@"GET"];
+
+    NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable dataTaskError) {
+        if (dataTaskError != NULL) {
+            NSLog(@"[Zebra] Error while getting reddit token: %@", dataTaskError);
+            return;
+        }
+
+        NSError *jsonError;
+        NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
+        if (jsonError != NULL) {
+            NSLog(@"[Zebra] Error while parsing reddit token JSON: %@", jsonError);
+            return;
+        }
+
+        NSArray<NSDictionary <NSString *, NSDictionary *> *> *children = [[json objectForKey:@"data"] objectForKey:@"children"];
+
+        NSMutableArray *redditPosts = [NSMutableArray new];
+        for (NSDictionary *child in children) {
+            NSDictionary *post = [child objectForKey:@"data"];
+
+            if ([[post objectForKey:@"stickied"] boolValue] == false && [self acceptableFlair:[post objectForKey:@"link_flair_text"]]) {
+                [redditPosts addObject:post];
+            }
+
+            if ([redditPosts count] == 3) break;
+        }
+        
+        self->redditPosts = redditPosts;
+    }];
+
+    [task resume];
+}
+
+- (BOOL)acceptableFlair:(NSString *)flairText {
+    if (flairText != NULL && ![flairText isEqual:[NSNull null]]) {
+        NSArray *acceptableFlairs = @[@"free release", @"paid release", @"update", @"upcoming", @"news", @"tutorial", @"jailbreak release"];
+        return [acceptableFlairs containsObject:[flairText lowercaseString]];
+    }
+
+    return false;
+}
+
 
 @end
