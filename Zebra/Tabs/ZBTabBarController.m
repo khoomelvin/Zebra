@@ -8,6 +8,7 @@
 
 #import "ZBTabBarController.h"
 #import "ZBTab.h"
+#import "Home/ZBHomeViewController.h"
 #import "Sources/Helpers/ZBSourceManager.h"
 #import "Packages/Controllers/ZBPackageListTableViewController.h"
 #import "Sources/Controllers/ZBSourceListViewController.h"
@@ -75,7 +76,10 @@
         [ZBAppDelegate sendErrorToTabController:error.localizedDescription];
     }
     
-    // Temporary, remove when all views are decoupled from storyboard
+    // TODO: Temporary, remove when all views are decoupled from storyboard
+    UINavigationController *homeNavController = self.viewControllers[ZBTabHome];
+    [homeNavController setViewControllers:@[[[ZBHomeViewController alloc] init]] animated:NO];
+    
     UINavigationController *sourcesNavController = self.viewControllers[ZBTabSources];
     [sourcesNavController setViewControllers:@[[[ZBSourceListViewController alloc] init]] animated:NO];
 }

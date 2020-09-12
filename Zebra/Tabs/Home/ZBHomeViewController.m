@@ -14,8 +14,20 @@
 
 @implementation ZBHomeViewController
 
+- (id)init {
+    self = [super init];
+    
+    if (self) {
+        self.title = NSLocalizedString(@"Home", @"");
+    }
+    
+    return self;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    NSLog(@"Hi!");
     // Do any additional setup after loading the view from its nib.
 }
 
