@@ -16,10 +16,10 @@
 #import <Tabs/Sources/Helpers/ZBSourceManager.h>
 
 @interface ZBHomeViewController () {
-    NSArray <ZBPackage *> *featuredPackages;
-    NSArray <NSDictionary *> *redditPosts;
+    NSArray <ZBPackage *> *allFeaturedPackages;
 }
-
+@property (readonly) NSArray <ZBPackage *> *featuredPackages;
+@property NSArray <NSDictionary *> *redditPosts;
 @end
 
 @implementation ZBHomeViewController
@@ -45,7 +45,6 @@
     [super viewDidLoad];
     
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"Settings"] landscapeImagePhone:[UIImage imageNamed:@"Settings"] style:UIBarButtonItemStylePlain target:self action:@selector(presentSettings)];
-    // Do any additional setup after loading the view from its nib.
 }
 
 - (void)presentSettings {
@@ -126,7 +125,7 @@
     }
 
     dispatch_group_notify(downloadGroup, dispatch_get_main_queue(), ^{
-        [self chooseFeaturedPackages];
+        // Present featured packages view
     });
 }
 
@@ -140,19 +139,22 @@
         [choices addObjectsFromArray:contents];
     }
     
+    allFeaturedPackages = choices;
+}
+
+- (NSArray <ZBPackage *> *)featuredPackages {
     // Choose 5 random packages from the choices
-    NSUInteger numberOfPackages = MIN(choices.count, 5); // Configurable later maybe?
+    NSUInteger allFeaturedPackagesCount = allFeaturedPackages.count;
+    NSUInteger numberOfPackages = MIN(allFeaturedPackagesCount, 5); // Configurable later maybe?
     NSMutableSet *selection = [NSMutableSet new];
 
     while (selection.count < numberOfPackages) {
-        id randomObject = [choices objectAtIndex:(arc4random() % choices.count)];
+        id randomObject = [allFeaturedPackages objectAtIndex:(arc4random() % allFeaturedPackagesCount)];
         [selection addObject:randomObject];
     }
 
-    featuredPackages = [selection allObjects];
-    NSLog(@"random choices %@", featuredPackages);
+    return [selection allObjects];
 }
-
 
 #pragma mark - Community News
 
